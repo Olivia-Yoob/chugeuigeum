@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>우리... 얼마 내야 해? 💌 축의금 국룰 계산기</title>
+<meta property="og:title" content="우리... 얼마 내야 해? 💌 축의금 국룰 계산기">
+<meta property="og:description" content="식대·관계·동행·직급까지 다 따져드릴게요. 2025 최신 기준 축의금 계산기 — 카톡으로 공유해보세요 🌸">
+<meta property="og:type" content="website">
+<meta name="theme-color" content="#c8a97e">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400;600;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --rose:    #c8a97e;
+  --rose-l:  #e8d5bb;
+  --rose-d:  #9a6e3a;
+  --rose-dd: #7a5020;
+  --ivory:   #faf8f4;
+  --ivory-d: #f2ede3;
+  --ivory-dd:#e6ddd0;
+  --ink:     #2c2418;
+  --ink-s:   #5a4e3c;
+  --ink-m:   #9a8e7c;
+  --green:   #4a7c59;
+  --red:     #b84040;
+  --border:  rgba(200,169,126,0.22);
+  --shadow:  rgba(44,36,24,0.12);
+  --r:14px; --r-lg:20px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:'Noto Sans KR',sans-serif;background:var(--ivory);color:var(--ink);min-height:100vh;overflow-x:hidden;}
+
+/* AMOUNT BAR — fixed top */
+.amount-bar-wrap{
+  position:fixed;top:0;left:0;right:0;z-index:200;
+  background:rgba(250,248,244,0.97);backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--border);padding:12px 20px;
+  display:flex;align-items:center;gap:12px;
+}
+.warning-strip{
+  position:fixed;top:52px;left:0;right:0;z-index:199;
+  background:rgba(184,64,64,0.08);border-top:1px solid rgba(184,64,64,0.2);
+  padding:7px 20px;font-size:11px;color:var(--red);
+  display:none;align-items:center;gap:6px;font-weight:500;
+}
+.warning-strip.show{display:flex;}
+.amount-label{font-size:11px;color:var(--ink-m);white-space:nowrap;font-weight:500;}
+.bar-outer{flex:1;height:10px;background:var(--ivory-dd);border-radius:100px;overflow:hidden;}
+.bar-inner{height:100%;border-radius:100px;background:linear-gradient(90deg,var(--rose-l),var(--rose),var(--rose-d));width:0%;transition:width .55s cubic-bezier(.4,0,.2,1);}
+.amount-display{font-family:'Noto Serif KR',serif;font-size:22px;font-weight:700;color:var(--rose-d);white-space:nowrap;min-width:85px;text-align:right;transition:all .3s;}
+
+/* HEADER */
+.header{
+  margin-top:52px;
+  background:linear-gradient(160deg,#fff 0%,var(--ivory-d) 100%);
+  border-bottom:1px solid var(--border);
+  padding:32px 20px 26px;text-align:center;position:relative;overflow:hidden;
+}
+.header::before,.header::after{content:'';position:absolute;width:160px;height:160px;border-radius:50%;background:rgba(200,169,126,0.07);pointer-events:none;}
+.header::before{top:-60px;left:-40px;}
+.header::after{bottom:-60px;right:-40px;}
+.petal{position:absolute;font-size:32px;opacity:0.12;pointer-events:none;animation:floatPetal 8s ease-in-out infinite;}
+.petal:nth-child(1){top:10%;left:8%;animation-delay:0s;}
+.petal:nth-child(2){top:20%;right:12%;animation-delay:2s;}
+.petal:nth-child(3){bottom:15%;left:15%;animation-delay:4s;}
+@keyframes floatPetal{0%,100%{transform:translateY(0) rotate(0deg);}50%{transform:translateY(-8px) rotate(10deg);}}
+.header-badge{display:inline-block;font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:var(--rose-d);border:1px solid var(--rose-l);padding:4px 14px;border-radius:100px;margin-bottom:14px;background:rgba(232,213,187,0.3);}
+.header h1{font-family:'Noto Serif KR',serif;font-size:28px;font-weight:700;color:var(--ink);line-height:1.25;margin-bottom:8px;}
+.header p{font-size:13px;color:var(--ink-m);line-height:1.7;}
+
+.main{max-width:480px;margin:0 auto;padding:20px 16px 110px;}
+
+/* STEP CARD */
+.step-card{background:#fff;border-radius:var(--r-lg);border:1px solid var(--border);box-shadow:0 2px 14px var(--shadow);padding:22px 20px;margin-bottom:14px;transition:border-color .2s,box-shadow .2s;}
+.step-card.has-sel{border-color:rgba(200,169,126,0.5);box-shadow:0 4px 20px rgba(200,169,126,0.15);}
+.step-header{display:flex;align-items:flex-start;gap:10px;margin-bottom:16px;}
+.step-num{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,var(--rose),var(--rose-d));color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+.step-title{font-family:'Noto Serif KR',serif;font-size:15px;font-weight:600;color:var(--ink);line-height:1.3;}
+.step-sub{font-size:11px;color:var(--ink-m);margin-top:3px;line-height:1.5;}
+
+/* OPT BUTTONS */
+.opt-row{display:flex;gap:8px;flex-wrap:wrap;}
+.opt-btn{
+  flex:1;min-width:0;padding:12px 8px;
+  border-radius:var(--r);border:1.5px solid var(--ivory-dd);
+  background:#fff;cursor:pointer;font-family:inherit;font-size:13px;font-weight:500;
+  color:var(--ink-s);text-align:center;line-height:1.3;
+  transition:all 0.3s cubic-bezier(0.175,0.885,0.32,1.275);
+  box-shadow:0 2px 4px rgba(0,0,0,0.03);
+  user-select:none;-webkit-tap-highlight-color:transparent;
+}
+.opt-btn:active{transform:scale(0.95);}
+.opt-btn:hover{border-color:var(--rose-l);background:rgba(232,213,187,0.12);}
+.opt-btn.sel{
+  border-color:var(--rose);background:var(--ivory);
+  color:var(--rose-dd);font-weight:700;
+  box-shadow:0 8px 15px rgba(200,169,126,0.22);
+  transform:translateY(-2px);
+}
+.opt-icon{font-size:22px;display:block;margin-bottom:5px;}
+.opt-badge{display:inline-block;font-size:9px;font-weight:600;color:var(--rose-d);background:rgba(200,169,126,0.18);padding:2px 7px;border-radius:100px;margin-top:4px;}
+.opt-badge.warn{background:rgba(184,64,64,0.1);color:var(--red);}
+.opt-grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.opt-grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
+
+/* VENUE SEARCH */
+.venue-wrap{position:relative;margin-bottom:12px;}
+.venue-input{width:100%;padding:12px 16px;border:1.5px solid var(--ivory-dd);border-radius:var(--r);background:var(--ivory);font-family:inherit;font-size:14px;color:var(--ink);transition:border-color .15s;-webkit-appearance:none;}
+.venue-input:focus{outline:none;border-color:var(--rose);}
+.venue-dropdown{position:absolute;top:calc(100% + 6px);left:0;right:0;background:#fff;border:1px solid var(--border);border-radius:var(--r);box-shadow:0 8px 28px var(--shadow);z-index:50;overflow:hidden;display:none;max-height:240px;overflow-y:auto;}
+.venue-dropdown.open{display:block;}
+.venue-item{padding:11px 14px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);transition:background .1s;}
+.venue-item:last-child{border-bottom:none;}
+.venue-item:hover{background:var(--ivory);}
+.venue-name{font-size:13px;font-weight:500;color:var(--ink);}
+.venue-detail{font-size:11px;color:var(--ink-m);margin-top:1px;}
+.venue-price-tag{font-size:13px;font-weight:700;color:var(--rose-d);white-space:nowrap;margin-left:12px;}
+.venue-selected{margin-top:8px;padding:10px 14px;background:rgba(200,169,126,0.08);border-radius:var(--r);border:1px solid var(--rose-l);display:none;align-items:center;gap:10px;}
+.venue-selected.show{display:flex;}
+.vs-info{flex:1;}
+.vs-name{font-size:13px;font-weight:600;color:var(--ink);}
+.vs-sub{font-size:11px;color:var(--ink-m);margin-top:1px;}
+.vs-price{font-size:15px;font-weight:700;color:var(--rose-d);}
+.venue-clear{font-size:18px;color:var(--ink-m);cursor:pointer;padding:4px;line-height:1;}
+
+/* RESULT ENVELOPE */
+.result-wrap{display:none;margin-bottom:14px;}
+.result-wrap.show{display:block;animation:fadeUp .5s cubic-bezier(.34,1.56,.64,1) both;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+.envelope-top{height:50px;background:#fff;clip-path:polygon(0 0,50% 60%,100% 0,100% 100%,0 100%);border:1px solid var(--rose-l);border-bottom:none;position:relative;z-index:1;}
+.envelope-body{
+  background:#fff;border:1px solid var(--rose-l);border-top:none;
+  border-radius:0 0 var(--r-lg) var(--r-lg);
+  padding:20px 24px 28px;position:relative;overflow:hidden;
+  box-shadow:0 20px 40px rgba(0,0,0,0.08),0 4px 16px rgba(200,169,126,0.15);
+}
+.envelope-body::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:repeating-linear-gradient(45deg,rgba(200,169,126,0.03) 0px,rgba(200,169,126,0.03) 1px,transparent 1px,transparent 8px);pointer-events:none;}
+.envelope-body::after{content:'CONFIDENTIAL';position:absolute;top:14px;right:-18px;transform:rotate(30deg);font-size:9px;color:var(--rose-l);letter-spacing:3px;font-weight:700;pointer-events:none;}
+.stamp{position:absolute;top:16px;right:20px;width:60px;height:60px;border-radius:50%;border:3px solid var(--rose-d);display:flex;flex-direction:column;align-items:center;justify-content:center;transform:rotate(-12deg);opacity:0.7;}
+.stamp-top{font-size:7px;letter-spacing:0.1em;color:var(--rose-d);font-weight:700;text-align:center;line-height:1.2;}
+.stamp-main{font-size:10px;font-weight:700;color:var(--rose-d);}
+.result-header{text-align:center;margin-bottom:20px;padding-top:8px;}
+.result-emoji-big{font-size:44px;display:block;margin-bottom:10px;}
+.result-grade{display:inline-block;font-size:12px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;padding:4px 14px;border-radius:100px;margin-bottom:8px;}
+.result-amount-wrap{text-align:center;margin-bottom:6px;}
+.result-amount{
+  font-family:'Noto Serif KR',serif;font-size:56px;font-weight:700;
+  color:var(--rose-d);line-height:1;display:inline-block;
+  text-shadow:2px 2px 0 var(--ivory-d);
+  animation:stampIn .4s cubic-bezier(.34,1.56,.64,1) .2s both;
+}
+@keyframes stampIn{from{opacity:0;transform:scale(1.4);}to{opacity:1;transform:scale(1);}}
+.result-won{font-size:20px;color:var(--ink-m);vertical-align:bottom;margin-left:2px;}
+.result-range{display:flex;gap:8px;justify-content:center;margin:10px 0 16px;}
+.range-pill{padding:5px 14px;border-radius:100px;font-size:12px;background:rgba(200,169,126,0.1);border:1px solid var(--rose-l);color:var(--rose-d);font-weight:600;}
+.result-meal-note{font-size:11px;color:var(--ink-m);text-align:center;margin-bottom:12px;padding:8px;background:rgba(200,169,126,0.06);border-radius:8px;}
+.result-meal-note.warn-note{background:rgba(184,64,64,0.07);color:var(--red);font-weight:500;}
+.result-tags{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-bottom:16px;}
+.result-tag{font-size:11px;padding:4px 11px;border-radius:100px;background:var(--ivory-d);color:var(--ink-s);border:1px solid var(--ivory-dd);}
+.result-divider{border:none;border-top:1px dashed var(--rose-l);margin:16px 0;}
+.result-comment{font-family:'Noto Serif KR',serif;font-style:italic;font-size:14px;color:var(--ink-s);line-height:1.75;text-align:center;margin-bottom:16px;}
+.odd-note{font-size:11px;color:var(--ink-m);text-align:center;margin-bottom:16px;padding:7px 12px;background:rgba(200,169,126,0.07);border-radius:8px;}
+.phrase-section{margin-bottom:18px;}
+.phrase-title{font-size:11px;color:var(--rose-d);font-weight:700;letter-spacing:0.1em;margin-bottom:8px;}
+.phrase-row{display:flex;align-items:center;justify-content:space-between;padding:9px 12px;border-radius:8px;background:var(--ivory);border:1px solid var(--ivory-dd);margin-bottom:6px;cursor:pointer;transition:all .15s;-webkit-tap-highlight-color:transparent;}
+.phrase-row:hover,.phrase-row:active{background:rgba(200,169,126,0.1);border-color:var(--rose-l);}
+.phrase-text{font-size:13px;color:var(--ink);}
+.phrase-copy{font-size:10px;color:var(--rose-d);font-weight:700;flex-shrink:0;margin-left:8px;}
+.share-btn{width:100%;padding:15px;background:linear-gradient(135deg,#FEE500,#F5D300);color:#3C1E1E;border:none;border-radius:var(--r);font-size:15px;font-weight:700;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:opacity .15s,transform .1s;margin-bottom:10px;box-shadow:0 3px 12px rgba(254,229,0,0.35);}
+.share-btn:hover{opacity:0.92;}.share-btn:active{transform:scale(0.98);}
+.reset-btn{width:100%;padding:12px;background:transparent;border:1.5px solid var(--ivory-dd);border-radius:var(--r);font-size:14px;color:var(--ink-m);font-family:inherit;cursor:pointer;transition:all .15s;}
+.reset-btn:hover{border-color:var(--rose-l);color:var(--rose-d);}
+
+/* CALC BTN */
+.calc-btn-wrap{position:fixed;bottom:0;left:0;right:0;z-index:100;padding:14px 20px 18px;background:rgba(250,248,244,0.97);backdrop-filter:blur(12px);border-top:1px solid var(--border);}
+.calc-btn{width:100%;max-width:480px;margin:0 auto;display:block;padding:15px;border-radius:var(--r);background:linear-gradient(135deg,var(--rose),var(--rose-d));color:#fff;font-size:16px;font-weight:700;font-family:inherit;border:none;cursor:pointer;transition:opacity .15s,transform .1s;box-shadow:0 4px 20px rgba(200,169,126,0.4);}
+.calc-btn:hover{opacity:0.92;}.calc-btn:active{transform:scale(0.98);}
+
+.toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(16px);background:var(--ink);color:#fff;padding:10px 20px;border-radius:100px;font-size:13px;z-index:999;opacity:0;transition:all .28s;pointer-events:none;white-space:nowrap;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.footer{text-align:center;padding:20px 20px 28px;font-size:10px;color:var(--ink-m);letter-spacing:0.05em;line-height:1.7;}
+
+@media(max-width:360px){.opt-grid3{grid-template-columns:1fr 1fr;}.result-amount{font-size:44px;}.header h1{font-size:24px;}}
+</style>
+</head>
+<body>
+
+<!-- AMOUNT BAR (fixed) -->
+<div class="amount-bar-wrap">
+  <span class="amount-label">예상 금액</span>
+  <div class="bar-outer"><div class="bar-inner" id="bar-inner"></div></div>
+  <div class="amount-display" id="amount-display">—</div>
+</div>
+<div class="warning-strip" id="warn-strip">⚠️ <span id="warn-text"></span></div>
+
+<!-- HEADER -->
+<div class="header">
+  <span class="petal">🌸</span><span class="petal">🌸</span><span class="petal">🌸</span>
+  <div class="header-badge">2025 Wedding Gift Calculator 💌</div>
+  <h1>축의금<br>얼마 내야 해?</h1>
+  <p>식대·관계·동행·직급까지 다 따져드릴게요<br>카톡 친구들과 공유해보세요 🤍</p>
+</div>
+
+<div class="main">
+  <div class="result-wrap" id="result-wrap">
+    <div class="envelope-top"></div>
+    <div class="envelope-body">
+      <div class="stamp"><span class="stamp-top">WEDDING</span><span class="stamp-main">💌</span><span class="stamp-top">GIFT</span></div>
+      <div id="result-inner"></div>
+    </div>
+  </div>
+
+  <div class="step-card" id="card-attend">
+    <div class="step-header"><div class="step-num">1</div><div><div class="step-title">결혼식에 가시나요?</div><div class="step-sub">참석 여부가 금액의 핵심이에요</div></div></div>
+    <div class="opt-row">
+      <button class="opt-btn" data-group="attend" data-val="yes" onclick="sel(this)"><span class="opt-icon">🥂</span>직접 참석해요<div class="opt-badge">식사 포함</div></button>
+      <button class="opt-btn" data-group="attend" data-val="no" onclick="sel(this)"><span class="opt-icon">💌</span>불참 · 봉투만<div class="opt-badge">식사 없음</div></button>
+      <button class="opt-btn" data-group="attend" data-val="face" onclick="sel(this)"><span class="opt-icon">👋</span>얼굴만 비추고<div class="opt-badge">식사 패스</div></button>
+    </div>
+  </div>
+
+  <div class="step-card" id="card-rel">
+    <div class="step-header"><div class="step-num">2</div><div><div class="step-title">어떤 관계인가요?</div><div class="step-sub">가장 가까운 관계로 선택해주세요</div></div></div>
+    <div class="opt-grid2">
+      <button class="opt-btn" data-group="rel" data-val="family" onclick="sel(this)"><span class="opt-icon">👨‍👩‍👧</span>가족 / 친척<div class="opt-badge">+30만~</div></button>
+      <button class="opt-btn" data-group="rel" data-val="bestfriend" onclick="sel(this)"><span class="opt-icon">🤝</span>절친 / 베프<div class="opt-badge">+10만~</div></button>
+      <button class="opt-btn" data-group="rel" data-val="friend" onclick="sel(this)"><span class="opt-icon">😊</span>친구 / 동기<div class="opt-badge">표준</div></button>
+      <button class="opt-btn" data-group="rel" data-val="coworker" onclick="sel(this)"><span class="opt-icon">💼</span>직장 동료<div class="opt-badge">비즈니스</div></button>
+      <button class="opt-btn" data-group="rel" data-val="acquaintance" onclick="sel(this)"><span class="opt-icon">👋</span>그냥 아는 사이<div class="opt-badge">-2만~</div></button>
+      <button class="opt-btn" data-group="rel" data-val="boss" onclick="sel(this)"><span class="opt-icon">👔</span>상사 / 거래처<div class="opt-badge">격식 필요</div></button>
+    </div>
+  </div>
+
+  <div class="step-card" id="card-contact">
+    <div class="step-header"><div class="step-num">3</div><div><div class="step-title">최근 1년 안에 사적으로 만난 적 있나요?</div><div class="step-sub">진짜 친한지 아닌지를 가려요</div></div></div>
+    <div class="opt-row">
+      <button class="opt-btn" data-group="contact" data-val="yes" onclick="sel(this)"><span class="opt-icon">☕</span>네, 만났어요<div class="opt-badge">+3~5만원</div></button>
+      <button class="opt-btn" data-group="contact" data-val="no" onclick="sel(this)"><span class="opt-icon">📭</span>거의 연락 없었어요<div class="opt-badge">그대로</div></button>
+    </div>
+  </div>
+
+  <div class="step-card" id="card-age">
+    <div class="step-header"><div class="step-num">4</div><div><div class="step-title">나의 상황은?</div><div class="step-sub">사회적 위치에 따라 기대값이 달라요</div></div></div>
+    <div class="opt-grid3">
+      <button class="opt-btn" data-group="age" data-val="junior" onclick="sel(this)"><span class="opt-icon">🌱</span>20대<br>사회초년생<div class="opt-badge">-1만원</div></button>
+      <button class="opt-btn" data-group="age" data-val="mid" onclick="sel(this)"><span class="opt-icon">💪</span>30대<br>직장인</button>
+      <button class="opt-btn" data-group="age" data-val="senior" onclick="sel(this)"><span class="opt-icon">🌳</span>40대+<br>또는 상사<div class="opt-badge">+3만원</div></button>
+    </div>
+  </div>
+
+  <div class="step-card" id="card-companion">
+    <div class="step-header"><div class="step-num">5</div><div><div class="step-title">같이 가는 사람 있나요?</div><div class="step-sub">동행인 수만큼 식대도 늘어요</div></div></div>
+    <div class="opt-grid3">
+      <button class="opt-btn" data-group="companion" data-val="solo" onclick="sel(this)"><span class="opt-icon">🙋</span>혼자<div class="opt-badge">×1</div></button>
+      <button class="opt-btn" data-group="companion" data-val="couple" onclick="sel(this)"><span class="opt-icon">👫</span>파트너와<div class="opt-badge">×2</div></button>
+      <button class="opt-btn" data-group="companion" data-val="family" onclick="sel(this)"><span class="opt-icon">👨‍👩‍👦</span>가족과<div class="opt-badge warn">×3+</div></button>
+    </div>
+  </div>
+
+  <div class="step-card" id="card-venue">
+    <div class="step-header"><div class="step-num">6</div><div><div class="step-title">어떤 식장인가요?</div><div class="step-sub">식장을 검색하면 식대가 자동 반영돼요</div></div></div>
+    <div class="venue-wrap">
+      <input type="text" class="venue-input" id="venue-input" placeholder="🔍  식장 검색 (예: 신라호텔, 더채플앳청담...)" oninput="venueSearch(this.value)" autocomplete="off">
+      <div class="venue-dropdown" id="venue-dropdown"></div>
+      <div class="venue-selected" id="venue-selected">
+        <div class="vs-info"><div class="vs-name" id="vs-name"></div><div class="vs-sub" id="vs-sub"></div></div>
+        <div class="vs-price" id="vs-price"></div>
+        <span class="venue-clear" onclick="clearVenue()">✕</span>
+      </div>
+    </div>
+    <div style="font-size:11px;color:var(--ink-m);margin-bottom:8px;">또는 종류로 선택</div>
+    <div class="opt-grid3">
+      <button class="opt-btn" data-group="venue" data-val="hotel5" onclick="selVT(this,'hotel5')"><span class="opt-icon">🏨</span>5성급 호텔<div class="opt-badge warn">식대 15만+</div></button>
+      <button class="opt-btn" data-group="venue" data-val="hotel" onclick="selVT(this,'hotel')"><span class="opt-icon">🏩</span>호텔급 홀<div class="opt-badge">식대 10~15만</div></button>
+      <button class="opt-btn" data-group="venue" data-val="hall" onclick="selVT(this,'hall')"><span class="opt-icon">💒</span>일반 웨딩홀<div class="opt-badge">식대 6~9만</div></button>
+      <button class="opt-btn" data-group="venue" data-val="church" onclick="selVT(this,'church')"><span class="opt-icon">⛪</span>교회·성당<div class="opt-badge">식대 4~7만</div></button>
+      <button class="opt-btn" data-group="venue" data-val="restaurant" onclick="selVT(this,'restaurant')"><span class="opt-icon">🍽️</span>레스토랑<div class="opt-badge">식대 8~15만</div></button>
+      <button class="opt-btn" data-group="venue" data-val="outdoor" onclick="selVT(this,'outdoor')"><span class="opt-icon">🌿</span>야외·스몰<div class="opt-badge">식대 5~10만</div></button>
+    </div>
+  </div>
+
+  <div class="step-card" id="card-invite">
+    <div class="step-header"><div class="step-num">7</div><div><div class="step-title">청첩장은 어떻게 받으셨나요?</div><div class="step-sub">직접 받았을 때 밥값도 고려해요</div></div></div>
+    <div class="opt-row">
+      <button class="opt-btn" data-group="invite" data-val="paper" onclick="sel(this)"><span class="opt-icon">📮</span>직접 만나서<br>종이 청첩장<div class="opt-badge">+밥값</div></button>
+      <button class="opt-btn" data-group="invite" data-val="mobile" onclick="sel(this)"><span class="opt-icon">📱</span>카톡/문자로<br>모바일 청첩장<div class="opt-badge">요즘 대세</div></button>
+    </div>
+  </div>
+
+  <div class="step-card" id="card-mywed">
+    <div class="step-header"><div class="step-num">8</div><div><div class="step-title">나의 경조사 상황은?</div><div class="step-sub">받을 수 있는지도 고려해요</div></div></div>
+    <div class="opt-grid2">
+      <button class="opt-btn" data-group="mywed" data-val="will" onclick="sel(this)"><span class="opt-icon">💍</span>나도 결혼 예정<div class="opt-badge">돌아와요</div></button>
+      <button class="opt-btn" data-group="mywed" data-val="already" onclick="sel(this)"><span class="opt-icon">👰</span>이미 결혼<br>(받을 일 없음)<div class="opt-badge">일방 지출</div></button>
+      <button class="opt-btn" data-group="mywed" data-val="no" onclick="sel(this)"><span class="opt-icon">🙅</span>결혼 계획 없음<div class="opt-badge">참고만</div></button>
+      <button class="opt-btn" data-group="mywed" data-val="recv" onclick="sel(this)"><span class="opt-icon">🤲</span>이미 받은 적 있음<div class="opt-badge">갚아야!</div></button>
+    </div>
+  </div>
+
+  <div class="step-card" id="card-prev">
+    <div class="step-header"><div class="step-num">9</div><div><div class="step-title">이전에 주고받은 금액?</div><div class="step-sub">전례가 있으면 최소한 맞춰드려요</div></div></div>
+    <div class="opt-grid3">
+      <button class="opt-btn" data-group="prev" data-val="none" onclick="sel(this)"><span class="opt-icon">—</span>없음</button>
+      <button class="opt-btn" data-group="prev" data-val="50" onclick="sel(this)"><span class="opt-icon">💵</span>5만원</button>
+      <button class="opt-btn" data-group="prev" data-val="70" onclick="sel(this)"><span class="opt-icon">💵</span>7만원</button>
+      <button class="opt-btn" data-group="prev" data-val="100" onclick="sel(this)"><span class="opt-icon">💵</span>10만원</button>
+      <button class="opt-btn" data-group="prev" data-val="150" onclick="sel(this)"><span class="opt-icon">💵</span>15만원</button>
+      <button class="opt-btn" data-group="prev" data-val="200" onclick="sel(this)"><span class="opt-icon">💰</span>20만원+</button>
+    </div>
+  </div>
+</div>
+
+<div class="calc-btn-wrap">
+  <button class="calc-btn" onclick="calculate()">💌 나의 적정 축의금 계산하기</button>
+</div>
+<div class="toast" id="toast"></div>
+<div class="footer">실제 금액은 개인 상황에 따라 달라질 수 있어요<br>이 계산기는 참고용입니다 ✦ 2025 한국 물가 기준</div>
+
+<script>
+const VENUES=[
+  {name:'신라호텔 서울',type:'hotel5',meal:185000,area:'서울 중구',region:'서울'},
+  {name:'롯데호텔 서울 본관',type:'hotel5',meal:175000,area:'서울 중구',region:'서울'},
+  {name:'롯데호텔 잠실',type:'hotel5',meal:170000,area:'서울 송파구',region:'서울'},
+  {name:'그랜드 하얏트 서울',type:'hotel5',meal:200000,area:'서울 용산구',region:'서울'},
+  {name:'JW 메리어트 서울',type:'hotel5',meal:185000,area:'서울 서초구',region:'서울'},
+  {name:'파크 하얏트 서울',type:'hotel5',meal:195000,area:'서울 강남구',region:'서울'},
+  {name:'웨스틴 조선 서울',type:'hotel5',meal:175000,area:'서울 중구',region:'서울'},
+  {name:'포시즌스 서울',type:'hotel5',meal:215000,area:'서울 종로구',region:'서울'},
+  {name:'시그니엘 서울',type:'hotel5',meal:220000,area:'서울 송파구',region:'서울'},
+  {name:'그랜드 워커힐 서울',type:'hotel5',meal:180000,area:'서울 광진구',region:'서울'},
+  {name:'인터컨티넨탈 서울 파르나스',type:'hotel5',meal:190000,area:'서울 강남구',region:'서울'},
+  {name:'인터컨티넨탈 서울 코엑스',type:'hotel5',meal:185000,area:'서울 강남구',region:'서울'},
+  {name:'조선팰리스 서울 강남',type:'hotel5',meal:210000,area:'서울 강남구',region:'서울'},
+  {name:'노보텔 앰배서더 강남',type:'hotel5',meal:160000,area:'서울 강남구',region:'서울'},
+  {name:'소피텔 앰배서더 서울',type:'hotel5',meal:175000,area:'서울 강남구',region:'서울'},
+  {name:'더채플앳청담',type:'hotel',meal:150000,area:'서울 강남구',region:'서울'},
+  {name:'라비두스',type:'hotel',meal:135000,area:'서울 강남구',region:'서울'},
+  {name:'그레이스리',type:'hotel',meal:120000,area:'서울 마포구',region:'서울'},
+  {name:'아모르파티',type:'hotel',meal:110000,area:'서울 송파구',region:'서울'},
+  {name:'더리버사이드',type:'hotel',meal:130000,area:'서울 광진구',region:'서울'},
+  {name:'엘타워',type:'hotel',meal:115000,area:'서울 영등포구',region:'서울'},
+  {name:'더클래식500',type:'hotel',meal:120000,area:'서울 광진구',region:'서울'},
+  {name:'빌라드바이리 강남',type:'hotel',meal:120000,area:'서울 강남구',region:'서울'},
+  {name:'마벨러스 웨딩홀',type:'hotel',meal:115000,area:'서울 마포구',region:'서울'},
+  {name:'라그란데 컨벤션',type:'hotel',meal:110000,area:'서울 서초구',region:'서울'},
+  {name:'오크우드 프리미어',type:'hotel',meal:125000,area:'서울 구로구',region:'서울'},
+  {name:'더파티 반포',type:'hotel',meal:110000,area:'서울 서초구',region:'서울'},
+  {name:'블루밍하우스',type:'hotel',meal:115000,area:'서울 서초구',region:'서울'},
+  {name:'더파티 강남',type:'hall',meal:90000,area:'서울 강남구',region:'서울'},
+  {name:'마리에웨딩',type:'hall',meal:85000,area:'서울 서초구',region:'서울'},
+  {name:'그랜드힐 컨벤션',type:'hall',meal:88000,area:'서울 강남구',region:'서울'},
+  {name:'리베라 호텔 웨딩',type:'hall',meal:90000,area:'서울 강남구',region:'서울'},
+  {name:'더하우스웨딩홀',type:'hall',meal:82000,area:'서울 강남구',region:'서울'},
+  {name:'SM웨딩홀 마포',type:'hall',meal:75000,area:'서울 마포구',region:'서울'},
+  {name:'세레모니클럽',type:'hall',meal:72000,area:'서울 종로구',region:'서울'},
+  {name:'메리메이커',type:'hall',meal:70000,area:'서울 서대문구',region:'서울'},
+  {name:'아트홀 가나',type:'hall',meal:78000,area:'서울 종로구',region:'서울'},
+  {name:'씨즌스 웨딩홀',type:'hall',meal:78000,area:'서울 강동구',region:'서울'},
+  {name:'웨딩시티 신도림',type:'hall',meal:72000,area:'서울 구로구',region:'서울'},
+  {name:'더컴벤홀 영등포',type:'hall',meal:75000,area:'서울 영등포구',region:'서울'},
+  {name:'더파티 강서',type:'hall',meal:72000,area:'서울 강서구',region:'서울'},
+  {name:'라운지W 충정로',type:'hall',meal:70000,area:'서울 서대문구',region:'서울'},
+  {name:'LW컨벤션센터',type:'hall',meal:75000,area:'서울 서대문구',region:'서울'},
+  {name:'서울대 연구공원 웨딩홀',type:'hall',meal:68000,area:'서울 관악구',region:'서울'},
+  {name:'명동성당',type:'church',meal:60000,area:'서울 중구',region:'서울'},
+  {name:'영락교회',type:'church',meal:55000,area:'서울 중구',region:'서울'},
+  {name:'사랑의교회',type:'church',meal:60000,area:'서울 서초구',region:'서울'},
+  {name:'온누리교회',type:'church',meal:57000,area:'서울 용산구',region:'서울'},
+  {name:'소망교회',type:'church',meal:58000,area:'서울 강남구',region:'서울'},
+  {name:'킨텍스 웨딩홀',type:'hall',meal:75000,area:'경기 고양시',region:'경기'},
+  {name:'일산 라페스타 웨딩',type:'hall',meal:70000,area:'경기 고양시',region:'경기'},
+  {name:'고양 아람누리',type:'hall',meal:68000,area:'경기 고양시',region:'경기'},
+  {name:'분당 에스케이아트리움',type:'hotel',meal:105000,area:'경기 성남시',region:'경기'},
+  {name:'분당우리교회',type:'church',meal:60000,area:'경기 성남시',region:'경기'},
+  {name:'성남 그레이스웨딩',type:'hall',meal:72000,area:'경기 성남시',region:'경기'},
+  {name:'수원 컨벤션센터',type:'hall',meal:72000,area:'경기 수원시',region:'경기'},
+  {name:'수원 팔달 컨벤션',type:'hall',meal:70000,area:'경기 수원시',region:'경기'},
+  {name:'용인 에버랜드 컨벤션',type:'hotel',meal:110000,area:'경기 용인시',region:'경기'},
+  {name:'안양 평촌 웨딩홀',type:'hall',meal:68000,area:'경기 안양시',region:'경기'},
+  {name:'인덕원 더웨딩홀',type:'hall',meal:68000,area:'경기 안양시',region:'경기'},
+  {name:'부천 상동 컨벤션',type:'hall',meal:67000,area:'경기 부천시',region:'경기'},
+  {name:'평택 센트럴 웨딩홀',type:'hall',meal:62000,area:'경기 평택시',region:'경기'},
+  {name:'파라다이스시티 인천',type:'hotel5',meal:175000,area:'인천 중구',region:'인천'},
+  {name:'인천 오라카이 호텔',type:'hotel',meal:110000,area:'인천 연수구',region:'인천'},
+  {name:'인천 그레이스 컨벤션',type:'hall',meal:70000,area:'인천 남동구',region:'인천'},
+  {name:'인천 로얄웨딩홀',type:'hall',meal:68000,area:'인천 부평구',region:'인천'},
+  {name:'인천 웨딩시티',type:'hall',meal:65000,area:'인천 서구',region:'인천'},
+  {name:'파라다이스 호텔 부산',type:'hotel5',meal:170000,area:'부산 해운대구',region:'부산'},
+  {name:'롯데호텔 부산',type:'hotel5',meal:160000,area:'부산 부산진구',region:'부산'},
+  {name:'웨스틴 조선 부산',type:'hotel5',meal:165000,area:'부산 해운대구',region:'부산'},
+  {name:'힐튼 부산',type:'hotel5',meal:175000,area:'부산 해운대구',region:'부산'},
+  {name:'노보텔 앰배서더 부산',type:'hotel5',meal:155000,area:'부산 해운대구',region:'부산'},
+  {name:'부산 센텀 웨딩홀',type:'hotel',meal:95000,area:'부산 해운대구',region:'부산'},
+  {name:'부산 W스퀘어 웨딩홀',type:'hall',meal:65000,area:'부산 부산진구',region:'부산'},
+  {name:'부산 그레이스 컨벤션',type:'hall',meal:63000,area:'부산 사하구',region:'부산'},
+  {name:'부산 시티웨딩',type:'hall',meal:62000,area:'부산 연제구',region:'부산'},
+  {name:'부산 자유컨벤션',type:'hall',meal:60000,area:'부산 사상구',region:'부산'},
+  {name:'대구 그랜드 호텔',type:'hotel5',meal:150000,area:'대구 중구',region:'대구'},
+  {name:'인터불고 호텔 대구',type:'hotel',meal:100000,area:'대구 동구',region:'대구'},
+  {name:'대구 엑스코 컨벤션',type:'hall',meal:70000,area:'대구 북구',region:'대구'},
+  {name:'대구 더파티',type:'hall',meal:68000,area:'대구 달서구',region:'대구'},
+  {name:'대구 수성 웨딩홀',type:'hall',meal:65000,area:'대구 수성구',region:'대구'},
+  {name:'광주 신양파크 호텔',type:'hotel',meal:95000,area:'광주 서구',region:'광주'},
+  {name:'광주 홀리데이인',type:'hotel',meal:90000,area:'광주 서구',region:'광주'},
+  {name:'광주 더파티',type:'hall',meal:65000,area:'광주 북구',region:'광주'},
+  {name:'광주 웨딩스퀘어',type:'hall',meal:60000,area:'광주 광산구',region:'광주'},
+  {name:'대전 유성 한화리조트',type:'hotel',meal:90000,area:'대전 유성구',region:'대전'},
+  {name:'대전 리베라 호텔',type:'hotel',meal:88000,area:'대전 서구',region:'대전'},
+  {name:'대전 그랜드 컨벤션',type:'hall',meal:68000,area:'대전 유성구',region:'대전'},
+  {name:'대전 아드리아 웨딩',type:'hall',meal:65000,area:'대전 서구',region:'대전'},
+  {name:'울산 현대 호텔',type:'hotel',meal:90000,area:'울산 남구',region:'울산'},
+  {name:'울산 그랜드 웨딩홀',type:'hall',meal:62000,area:'울산 남구',region:'울산'},
+  {name:'아산 파라다이스 리조트',type:'hotel',meal:90000,area:'충남 아산시',region:'충청'},
+  {name:'천안 더웨딩',type:'hall',meal:65000,area:'충남 천안시',region:'충청'},
+  {name:'청주 그랜드플라자',type:'hotel',meal:85000,area:'충북 청주시',region:'충청'},
+  {name:'청주 컨벤션웨딩',type:'hall',meal:62000,area:'충북 청주시',region:'충청'},
+  {name:'전주 한옥마을 웨딩홀',type:'outdoor',meal:80000,area:'전북 전주시',region:'전라'},
+  {name:'전주 그레이스 컨벤션',type:'hall',meal:60000,area:'전북 전주시',region:'전라'},
+  {name:'군산 더파티',type:'hall',meal:58000,area:'전북 군산시',region:'전라'},
+  {name:'목포 더블유 컨벤션',type:'hall',meal:58000,area:'전남 목포시',region:'전라'},
+  {name:'창원 롯데호텔',type:'hotel5',meal:150000,area:'경남 창원시',region:'경상'},
+  {name:'창원 컨벤션센터',type:'hall',meal:68000,area:'경남 창원시',region:'경상'},
+  {name:'경주 힐튼 호텔',type:'hotel5',meal:160000,area:'경북 경주시',region:'경상'},
+  {name:'진주 세이지 컨벤션',type:'hall',meal:62000,area:'경남 진주시',region:'경상'},
+  {name:'포항 라한 호텔',type:'hotel',meal:88000,area:'경북 포항시',region:'경상'},
+  {name:'구미 그랜드 컨벤션',type:'hall',meal:62000,area:'경북 구미시',region:'경상'},
+  {name:'강릉 씨마크 호텔',type:'hotel',meal:105000,area:'강원 강릉시',region:'강원'},
+  {name:'속초 설악 한화리조트',type:'hotel',meal:95000,area:'강원 속초시',region:'강원'},
+  {name:'춘천 레고스 웨딩',type:'hall',meal:62000,area:'강원 춘천시',region:'강원'},
+  {name:'원주 더파티',type:'hall',meal:60000,area:'강원 원주시',region:'강원'},
+  {name:'제주 신라호텔',type:'hotel5',meal:200000,area:'제주 서귀포시',region:'제주'},
+  {name:'롯데호텔 제주',type:'hotel5',meal:190000,area:'제주 서귀포시',region:'제주'},
+  {name:'그랜드 하얏트 제주',type:'hotel5',meal:195000,area:'제주 제주시',region:'제주'},
+  {name:'파르나스 호텔 제주',type:'hotel5',meal:185000,area:'제주 서귀포시',region:'제주'},
+  {name:'제주 오션스위츠',type:'hotel',meal:130000,area:'제주 서귀포시',region:'제주'},
+  {name:'제주 KAL 호텔',type:'hotel',meal:115000,area:'제주 제주시',region:'제주'},
+  {name:'제주 ICC 컨벤션센터',type:'hall',meal:80000,area:'제주 서귀포시',region:'제주'},
+  {name:'제주 야외 스몰웨딩',type:'outdoor',meal:90000,area:'제주 전역',region:'제주'},
+];
+const TYPE_AVG={hotel5:{avg:190000,safeLine:150000,label:'5성급 호텔'},hotel:{avg:128000,safeLine:100000,label:'호텔급 웨딩홀'},hall:{avg:78000,safeLine:50000,label:'일반 웨딩홀'},church:{avg:57000,safeLine:40000,label:'교회·성당'},restaurant:{avg:110000,safeLine:80000,label:'레스토랑'},outdoor:{avg:72000,safeLine:50000,label:'야외·스몰웨딩'}};
+const GRADES=[
+  {min:500000,emoji:'👑',label:'왕족 등극',color:'#8B6914',bg:'rgba(200,169,126,0.15)',comment:'이 정도면 형제자매도 감동받을 금액이에요. 상대방이 평생 기억할 거예요 👑'},
+  {min:300000,emoji:'🥇',label:'명예 가족 인증',color:'#8B6914',bg:'rgba(200,169,126,0.12)',comment:'이 정도면 평생 베프 확정! 신랑·신부가 눈물 흘릴 거예요 🥹'},
+  {min:200000,emoji:'🥂',label:'진심 담은 마음',color:'#4a7c59',bg:'rgba(74,124,89,0.08)',comment:'넉넉하게 마음 담은 금액이에요. 오래 기억에 남을 거예요 🤍'},
+  {min:150000,emoji:'💐',label:'베프 인증 완료',color:'#4a7c59',bg:'rgba(74,124,89,0.08)',comment:'이 정도면 진짜 친한 사이 인정! 밥값 내고도 마음 더 얹은 금액이에요 🌸'},
+  {min:100000,emoji:'✨',label:'2025 국룰',color:'#9a6e3a',bg:'rgba(200,169,126,0.1)',comment:'요즘 딱 표준! 깔끔한 비즈니스·친구 관계 유지에 딱 맞는 금액이에요 😊'},
+  {min:70000,emoji:'🍀',label:'실속형 선택',color:'#9a6e3a',bg:'rgba(200,169,126,0.1)',comment:'7만원은 요즘 고물가 대안! 5만원은 애매하고 10만원은 부담스러울 때 딱이에요'},
+  {min:50000,emoji:'🌱',label:'얼굴만 비춰도 고마운 사이',color:'var(--ink-m)',bg:'rgba(0,0,0,0.03)',comment:'식사를 안 할 경우 또는 멀어진 사이라면 이 정도도 괜찮아요 👋'},
+  {min:0,emoji:'😅',label:'마음만 받을게요',color:'var(--ink-m)',bg:'rgba(0,0,0,0.03)',comment:'관계와 상황에 따라 최선의 선택이에요. 마음이 중요하죠!'},
+];
+const ODD=[30000,50000,70000,100000,150000,200000,300000,500000];
+function toOdd(a){let b=ODD[0];for(const v of ODD){if(v<=a)b=v;}if(a>ODD[ODD.length-1])b=a;return b;}
+const S={attend:null,rel:null,contact:null,age:null,companion:null,venue:null,venueType:null,mealPerPerson:null,invite:null,mywed:null,prev:null};
+function sel(btn){const g=btn.dataset.group;document.querySelectorAll('[data-group="'+g+'"]').forEach(b=>b.classList.remove('sel'));btn.classList.add('sel');S[g]=btn.dataset.val;btn.closest('.step-card')?.classList.add('has-sel');updateBar();}
+function selVT(btn,type){clearVenue(false);document.querySelectorAll('[data-group="venue"]').forEach(b=>b.classList.remove('sel'));btn.classList.add('sel');S.venueType=type;S.venue=null;S.mealPerPerson=TYPE_AVG[type].avg;btn.closest('.step-card')?.classList.add('has-sel');updateBar();}
+function venueSearch(q){const dd=document.getElementById('venue-dropdown');if(!q||q.length<1){dd.classList.remove('open');return;}const ql=q.toLowerCase();const res=VENUES.filter(v=>v.name.toLowerCase().includes(ql)||v.area.includes(ql)||(v.region&&v.region.includes(q))).slice(0,8);if(!res.length){dd.classList.remove('open');return;}dd.innerHTML=res.map(v=>'<div class="venue-item" onclick=\'pickVenue('+JSON.stringify(v)+')\'>  <div><div class="venue-name">'+v.name+'</div><div class="venue-detail">'+v.area+' · '+(TYPE_AVG[v.type]?.label||'')+'</div></div><div class="venue-price-tag">인당 '+(v.meal/10000).toFixed(1)+'만원</div></div>').join('');dd.classList.add('open');}
+function pickVenue(v){document.querySelectorAll('[data-group="venue"]').forEach(b=>b.classList.remove('sel'));S.venue=v.name;S.venueType=v.type;S.mealPerPerson=v.meal;document.getElementById('venue-input').value='';document.getElementById('venue-dropdown').classList.remove('open');document.getElementById('vs-name').textContent=v.name;document.getElementById('vs-sub').textContent=v.area+' · '+(TYPE_AVG[v.type]?.label||'');document.getElementById('vs-price').textContent='인당 '+(v.meal/10000).toFixed(1)+'만원';document.getElementById('venue-selected').classList.add('show');document.getElementById('card-venue').classList.add('has-sel');updateBar();}
+function clearVenue(ci=true){S.venue=null;if(ci){document.getElementById('venue-input').value='';S.mealPerPerson=null;S.venueType=null;}document.getElementById('venue-selected').classList.remove('show');document.getElementById('venue-dropdown').classList.remove('open');updateBar();}
+document.addEventListener('click',e=>{if(!e.target.closest('.venue-wrap'))document.getElementById('venue-dropdown').classList.remove('open');});
+function calcAmt(){
+  const rb={family:350000,bestfriend:150000,friend:100000,coworker:70000,acquaintance:50000,boss:100000};
+  let base=rb[S.rel]||100000;
+  if(S.attend==='no')base=Math.round(base*.75);
+  if(S.attend==='face')base=Math.round(base*.85);
+  if(S.contact==='yes')base+=30000;
+  if(S.age==='junior')base-=10000;
+  if(S.age==='senior')base+=30000;
+  if(S.invite==='paper')base+=10000;
+  if(S.invite==='mobile'&&(S.rel==='acquaintance'||S.rel==='coworker'))base-=10000;
+  if(S.mywed==='already')base=Math.round(base*.93);
+  if(S.prev&&S.prev!=='none'){const p=parseInt(S.prev)*1000;if(S.mywed==='recv')base=Math.max(base,p);else if(p>base)base=Math.round((base+p)/2/10000)*100000;}
+  const meal=S.mealPerPerson||(S.venueType?TYPE_AVG[S.venueType]?.avg:70000)||70000;
+  const cnt={solo:1,couple:2,family:3}[S.companion]||1;
+  const mealCost=(S.attend==='yes'||S.attend==='face')?meal*cnt:0;
+  let final=Math.max(base,mealCost);
+  final=Math.round(final/10000)*10000;
+  let rec=toOdd(final);
+  const is7=((S.rel==='friend'||S.rel==='acquaintance')&&(S.venueType==='hall'||S.venueType==='church')&&S.companion==='solo'&&rec>=50000&&rec<100000);
+  if(is7)rec=70000;
+  return{amount:rec,mealCost,meal,companions:cnt,mealWarning:mealCost>0&&rec<mealCost,is7};
+}
+function updateBar(){
+  if(!S.rel){document.getElementById('amount-display').textContent='—';document.getElementById('bar-inner').style.width='0%';document.getElementById('warn-strip').classList.remove('show');return;}
+  const{amount,mealWarning,mealCost}=calcAmt();
+  document.getElementById('bar-inner').style.width=Math.min(amount/500000*100,100)+'%';
+  document.getElementById('amount-display').textContent=(amount/10000)+'만원';
+  if(mealWarning){document.getElementById('warn-text').textContent='식대가 '+(mealCost/10000).toFixed(1)+'만원인데 축의금이 적어요! 신랑·신부가 눈물을 흘릴 수 있습니다 😢';document.getElementById('warn-strip').classList.add('show');}
+  else document.getElementById('warn-strip').classList.remove('show');
+}
+function calculate(){
+  if(!S.rel){showToast('최소한 관계(2번)를 선택해주세요 💌');return;}
+  const{amount,mealCost,meal,companions,mealWarning,is7}=calcAmt();
+  const grade=GRADES.find(g=>amount>=g.min)||GRADES[GRADES.length-1];
+  const isOdd=[30000,50000,70000,100000,150000,200000,300000,500000].includes(amount);
+  const oddNote=is7?'🍀 7만원의 마법! 5만원은 애매하고 10만원이 부담스러울 때 딱인 금액이에요':isOdd?'✅ 한국 관습에 맞는 홀수·정수 금액이에요':'💡 한국 경조사 관습: 3·5·7·10·15·20·30만원이 선호돼요';
+  let mealHTML='';
+  if(mealCost>0){const cls=mealWarning?'result-meal-note warn-note':'result-meal-note';const txt=mealWarning?'⚠️ 식대 '+(meal/10000).toFixed(1)+'만원 × '+companions+'명 = '+(mealCost/10000).toFixed(1)+'만원인데 축의금이 적어요!':'✅ 식대 '+(meal/10000).toFixed(1)+'만원 × '+companions+'명 = '+(mealCost/10000).toFixed(1)+'만원 — 충분히 커버돼요';mealHTML='<div class="'+cls+'">'+txt+'</div>';}
+  const rL={family:'가족/친척',bestfriend:'절친/베프',friend:'친구/동기',coworker:'직장동료',acquaintance:'아는사이',boss:'상사/거래처'};
+  const aL={yes:'직접참석',no:'불참·봉투만',face:'얼굴만'};
+  const vL=S.venue||(S.venueType?TYPE_AVG[S.venueType]?.label:null)||'식장미정';
+  const tags=[rL[S.rel],aL[S.attend],S.companion==='couple'?'2인참석':S.companion==='family'?'가족동반':'혼자',vL].filter(Boolean);
+  const lo=amount-10000>0?amount-10000:amount,hi=amount+20000;
+  const phrases={family:['결혼을 진심으로 축하드립니다','두 분이 이룰 가정을 축복합니다','오래오래 행복하게 사세요 💕'],bestfriend:['야 진짜 축하해! 행복하게 살아 🎊','나중에 내 결혼식에도 꼭 와줘','평생 지금처럼만 행복해 💐'],friend:['결혼 진심으로 축하해!','두 사람의 앞날을 응원해','화목한 가정 이루길 바라 🌸'],coworker:['결혼을 진심으로 축하드립니다','두 분의 앞날을 축복합니다','삼가 축의를 드립니다'],acquaintance:['결혼을 진심으로 축하드립니다','두 분의 앞날을 축복합니다','행복한 가정 이루시길 바랍니다'],boss:['결혼을 진심으로 축하드립니다','두 분의 앞날에 행복이 가득하길 바랍니다','삼가 축하의 마음을 전합니다']};
+  const ph=(phrases[S.rel]||phrases.friend);
+  document.getElementById('result-inner').innerHTML=
+    '<div class="result-header"><span class="result-emoji-big">'+grade.emoji+'</span><div class="result-grade" style="color:'+grade.color+';background:'+grade.bg+';">'+grade.label+'</div></div>'+
+    '<div class="result-amount-wrap"><span class="result-amount">'+(amount/10000)+'</span><span class="result-won">만원</span></div>'+
+    '<div class="result-range"><span class="range-pill">최소 '+(lo/10000)+'만원</span><span style="color:var(--ink-m);padding:0 4px;">~</span><span class="range-pill">여유 '+(hi/10000)+'만원</span></div>'+
+    mealHTML+
+    '<div class="result-tags">'+tags.map(t=>'<span class="result-tag">'+t+'</span>').join('')+'</div>'+
+    '<div class="odd-note">'+oddNote+'</div>'+
+    '<hr class="result-divider">'+
+    '<div class="result-comment">'+grade.comment+'</div>'+
+    '<hr class="result-divider">'+
+    '<div class="phrase-section"><div class="phrase-title">✉️ 봉투 문구 추천 (탭하면 복사)</div>'+
+    ph.map(p=>'<div class="phrase-row" onclick="copyTxt(\''+p+'\')"><span class="phrase-text">'+p+'</span><span class="phrase-copy">복사</span></div>').join('')+'</div>'+
+    '<button class="share-btn" onclick="shareResult('+amount+')"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 5.92 2 10.77c0 2.9 1.57 5.49 4.03 7.19L5.5 21l4.22-2.16c.73.2 1.5.31 2.28.31 5.52 0 10-3.92 10-8.77S17.52 2 12 2z"/></svg>카카오톡으로 공유하기</button>'+
+    '<button class="reset-btn" onclick="resetAll()">🔄 다시 계산하기</button>';
+  document.getElementById('result-wrap').classList.add('show');
+  document.getElementById('result-wrap').scrollIntoView({behavior:'smooth',block:'start'});
+  document.getElementById('bar-inner').style.width=Math.min(amount/500000*100,100)+'%';
+  document.getElementById('amount-display').textContent=(amount/10000)+'만원';
+}
+function copyTxt(t){const ok=()=>showToast('복사했어요 ✅ 카톡에 붙여넣기하세요');if(navigator.clipboard?.writeText)navigator.clipboard.writeText(t).then(ok).catch(()=>fb(t,ok));else fb(t,ok);}
+function fb(t,cb){const e=document.createElement('textarea');e.value=t;document.body.appendChild(e);e.select();document.execCommand('copy');document.body.removeChild(e);cb();}
+function shareResult(amount){const url=window.location.href;const title='우리... 얼마 내야 해? 💌 축의금 국룰 계산기';const text='💌 나의 적정 축의금은 '+(amount/10000)+'만원!\n\n우리... 얼마 내야 해? 축의금 국룰 계산기 👇\n'+url;if(navigator.share)navigator.share({title,text,url}).catch(()=>{});else navigator.clipboard?.writeText(url).then(()=>showToast('링크 복사! 카톡에 붙여넣기 하세요 📋')).catch(()=>fb(url,()=>showToast('링크 복사!')));}
+function resetAll(){Object.keys(S).forEach(k=>S[k]=null);document.querySelectorAll('.opt-btn').forEach(b=>b.classList.remove('sel'));document.querySelectorAll('.step-card').forEach(c=>c.classList.remove('has-sel'));clearVenue();document.getElementById('result-wrap').classList.remove('show');document.getElementById('bar-inner').style.width='0%';document.getElementById('amount-display').textContent='—';document.getElementById('warn-strip').classList.remove('show');window.scrollTo({top:0,behavior:'smooth'});}
+function showToast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
+</script>
+</body>
+</html>
